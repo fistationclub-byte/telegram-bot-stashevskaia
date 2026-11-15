@@ -1,7 +1,7 @@
 import { expect, test } from "vitest";
 import { createBot } from "./bot.js";
 
-test("приветствие показывает три кнопки в одном ряду, каждая отвечает", async () => {
+test("приветствие показывает три кнопки в одном ряду, первая ведёт на сайт", async () => {
   const bot = createBot("123:fake-token");
   const calls: { method: string; payload: unknown }[] = [];
   bot.botInfo = {
@@ -38,7 +38,7 @@ test("приветствие показывает три кнопки в одн�
       },
     });
   }
-  for (const data of ["course_info", "free_channel", "buy_course"]) {
+  for (const data of ["free_channel", "buy_course"]) {
     await bot.handleUpdate({
       update_id: 2,
       callback_query: {
@@ -60,7 +60,7 @@ test("приветствие показывает три кнопки в одн�
       reply_markup: {
         inline_keyboard: [
           [
-            { text: "О курсе", callback_data: "course_info" },
+            { text: "О курсе", url: "https://www.stashevskaya.space/" },
             { text: "Хореографии", callback_data: "free_channel" },
             { text: "Хочу купить", callback_data: "buy_course" },
           ],
@@ -69,18 +69,7 @@ test("приветствие показывает три кнопки в одн�
     },
   });
   expect(calls[1]?.method).toBe("sendMessage");
-  expect(calls[2]).toMatchObject({
-    method: "answerCallbackQuery",
-    payload: { callback_query_id: "test" },
-  });
-  expect(calls[3]).toMatchObject({
-    method: "sendMessage",
-    payload: {
-      chat_id: 1,
-      text: expect.stringContaining("https://www.stashevskaya.space/"),
-    },
-  });
-  expect(calls.slice(4)).toEqual(
+  expect(calls.slice(2)).toEqual(
     [
       "Ссылка на бесплатный канал скоро появится.",
       "Информация о покупке скоро появится.",

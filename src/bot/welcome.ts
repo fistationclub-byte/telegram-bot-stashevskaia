@@ -8,7 +8,7 @@ export function registerWelcome(bot: Bot) {
         "С чего начнём?",
       {
         reply_markup: new InlineKeyboard()
-          .text("О курсе", "course_info")
+          .url("О курсе", "https://www.stashevskaya.space/")
           .text("Хореографии", "free_channel")
           .text("Хочу купить", "buy_course"),
       },
@@ -17,13 +17,6 @@ export function registerWelcome(bot: Bot) {
 
   bot.command("help", async (context) => {
     await context.reply("/start — открыть меню курса и бесплатного канала.");
-  });
-
-  bot.callbackQuery("course_info", async (context) => {
-    await context.answerCallbackQuery();
-    await context.reply(
-      "Подробнее об онлайн-курсе «Пластика бёдер с нуля»:\nhttps://www.stashevskaya.space/",
-    );
   });
 
   bot.callbackQuery("free_channel", async (context) => {

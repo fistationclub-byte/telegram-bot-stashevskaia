@@ -1,0 +1,14 @@
+services:
+  bot:
+    build:
+      context: ../..
+      dockerfile: deploy/local/Dockerfile
+    environment:
+      - "${BOT_TOKEN_ENV:-TELEGRAM_DEV_BOT_TOKEN}"
+    user: "${BOT_UID:-1000}:${BOT_GID:-1000}"
+    volumes:
+      - ../../.runtime:/app/.runtime
+    cpus: 0.5
+    mem_limit: 192m
+    init: true
+    restart: "no"

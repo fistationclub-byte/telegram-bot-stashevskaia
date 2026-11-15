@@ -1,4 +1,5 @@
-import { Bot, InlineKeyboard } from "grammy";
+import { Bot } from "grammy";
+import { registerWelcome } from "./bot/welcome.js";
 
 export function createBot(token: string, recordActivity?: () => void) {
   const bot = new Bot(token);
@@ -10,24 +11,7 @@ export function createBot(token: string, recordActivity?: () => void) {
     });
   }
 
-  bot.command("start", async (context) => {
-    await context.reply(
-      "Привет! Нажмите кнопку, чтобы проверить работу бота.",
-      {
-        reply_markup: new InlineKeyboard().text("Проверить", "check"),
-      },
-    );
-  });
-
-  bot.command("help", async (context) => {
-    await context.reply(
-      "/start — открыть кнопку проверки\n/help — показать подсказку",
-    );
-  });
-
-  bot.callbackQuery("check", async (context) => {
-    await context.answerCallbackQuery("Бот работает!");
-  });
+  registerWelcome(bot);
 
   return bot;
 }

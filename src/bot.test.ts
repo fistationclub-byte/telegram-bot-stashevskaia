@@ -1,9 +1,9 @@
 import { expect, test } from "vitest";
 import { createBot } from "./bot.js";
 
-test("команды и кнопка вызывают Telegram API", async () => {
+test("приветствие показывает три кнопки в одном ряду, каждая отвечает", async () => {
   const bot = createBot("123:fake-token");
-  const methods: string[] = [];
+  const calls: { method: string; payload: unknown }[] = [];
   bot.botInfo = {
     id: 123,
     is_bot: true,
@@ -19,8 +19,8 @@ test("команды и кнопка вызывают Telegram API", async () =>
     can_manage_bots: false,
     supports_join_request_queries: false,
   };
-  bot.api.config.use(async (_previous, method) => {
-    methods.push(method);
+  bot.api.config.use(async (_previous, method, payload) => {
+    calls.push({ method, payload });
     return { ok: true, result: true } as Awaited<ReturnType<typeof _previous>>;
   });
 
@@ -38,18 +38,35 @@ test("команды и кнопка вызывают Telegram API", async () =>
       },
     });
   }
-  await bot.handleUpdate({
-    update_id: 2,
-    callback_query: {
-      id: "test",
-      from: user,
-      chat_instance: "test",
-      data: "check",
+  for (const data of ["course_info", "free_channel", "buy_course"]) {
+    await bot.handleUpdate({
+      update_id: 2,
+      callback_query: { id: "test", from: user, chat_instance: "test", data },
+    });
+  }
+  expect(calls[0]).toMatchObject({
+    method: "sendMessage",
+    payload: {
+      reply_markup: {
+        inline_keyboard: [
+          [
+            { text: "О курсе", callback_data: "course_info" },
+            { text: "Хореографии", callback_data: "free_channel" },
+            { text: "Хочу купить", callback_data: "buy_course" },
+          ],
+        ],
+      },
     },
   });
-  expect(methods).toEqual([
-    "sendMessage",
-    "sendMessage",
-    "answerCallbackQuery",
-  ]);
+  expect(calls[1]?.method).toBe("sendMessage");
+  expect(calls.slice(2)).toEqual(
+    [
+      "Ссылка на сайт скоро появится.",
+      "Ссылка на бесплатный канал скоро появится.",
+      "Информация о покупке скоро появится.",
+    ].map((text) => ({
+      method: "answerCallbackQuery",
+      payload: { callback_query_id: "test", text },
+    })),
+  );
 });

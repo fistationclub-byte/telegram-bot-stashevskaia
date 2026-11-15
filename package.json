@@ -1,0 +1,33 @@
+{
+  "name": "telegram-bot",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": "24.x"
+  },
+  "packageManager": "pnpm@10.22.0",
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "format:check": "prettier --check .",
+    "test": "vitest run",
+    "dev:up": "node scripts/local.mjs up",
+    "dev:stop": "node scripts/local.mjs stop",
+    "dev:status": "node scripts/local.mjs ps",
+    "dev:logs": "node scripts/local.mjs logs"
+  },
+  "dependencies": {
+    "grammy": "^1.38.0",
+    "yaml": "^2.8.1",
+    "zod": "^4.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "eslint": "^9.0.0",
+    "prettier": "^3.6.0",
+    "typescript": "^5.9.0",
+    "typescript-eslint": "^8.0.0",
+    "vitest": "^3.2.0"
+  }
+}

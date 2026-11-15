@@ -1,0 +1,11 @@
+{
+  "git": {
+    "deploymentEnabled": { "**": false, "master": true }
+  },
+  "functions": {
+    "api/telegram.ts": {
+      "includeFiles": "config/project.yaml",
+      "maxDuration": 15
+    }
+  }
+}

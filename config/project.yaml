@@ -10,38 +10,38 @@ git:
   production_branch: master
   integration_branch: development
   feature_prefixes: [feat, fix, refactor]
-  github_repository: ""       # owner/repository, e.g. acme/my-telegram-bot; no credentials
-  remote_name: origin          # Codex must verify this matches git remote and gh
+  github_repository: "" # owner/repository, e.g. acme/my-telegram-bot; no credentials
+  remote_name: origin # Codex must verify this matches git remote and gh
 
 development:
   telegram:
     transport: polling
-    display_name: ""        # Telegram display name, e.g. My Bot (Dev)
-    username: ""            # public @username, e.g. @my_bot_dev; NEVER a token
-    token_env: TELEGRAM_DEV_BOT_TOKEN  # only the environment variable NAME
+    display_name: "" # Telegram display name, e.g. My Bot (Dev)
+    username: "stashevskaia_dev_bot" # public @username, e.g. @my_bot_dev; NEVER a token
+    token_env: TELEGRAM_DEV_BOT_TOKEN # only the environment variable NAME
   docker:
     compose_project_name: tg-bot-development
     idle_timeout_minutes: 120
     check_interval_seconds: 60
     max_session_hours: 8
   webhook:
-    transport: none         # future options: cloudflare_tunnel | vps
-    public_hostname: ""    # e.g. dev-bot.example.com; NOT a token
+    transport: none # future options: cloudflare_tunnel | vps
+    public_hostname: "" # e.g. dev-bot.example.com; NOT a token
 
 production:
   telegram:
     transport: webhook
-    display_name: ""        # Telegram display name, e.g. My Bot
-    username: ""            # public @username, e.g. @my_bot; NEVER a token
+    display_name: "" # Telegram display name, e.g. My Bot
+    username: "stashevskaia_bot" # public @username, e.g. @my_bot; NEVER a token
     token_env: TELEGRAM_PROD_BOT_TOKEN # only the environment variable NAME
     webhook_secret_env: TELEGRAM_WEBHOOK_SECRET
     webhook_path: /api/telegram
   hosting:
     provider: vercel
-    region: ""            # choose deliberately if needed
+    region: "" # choose deliberately if needed
 
 infrastructure:
   vps:
-    ssh_alias: deploy      # ~/.ssh/config, IsHosting; not used in v1
+    ssh_alias: deploy # ~/.ssh/config, IsHosting; not used in v1
   terraform:
     enabled: false

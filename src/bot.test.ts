@@ -41,7 +41,17 @@ test("приветствие показывает три кнопки в одн�
   for (const data of ["course_info", "free_channel", "buy_course"]) {
     await bot.handleUpdate({
       update_id: 2,
-      callback_query: { id: "test", from: user, chat_instance: "test", data },
+      callback_query: {
+        id: "test",
+        from: user,
+        chat_instance: "test",
+        data,
+        message: {
+          message_id: 1,
+          date: 1,
+          chat: { id: 1, type: "private", first_name: "Test" },
+        },
+      },
     });
   }
   expect(calls[0]).toMatchObject({
@@ -59,9 +69,19 @@ test("приветствие показывает три кнопки в одн�
     },
   });
   expect(calls[1]?.method).toBe("sendMessage");
-  expect(calls.slice(2)).toEqual(
+  expect(calls[2]).toMatchObject({
+    method: "answerCallbackQuery",
+    payload: { callback_query_id: "test" },
+  });
+  expect(calls[3]).toMatchObject({
+    method: "sendMessage",
+    payload: {
+      chat_id: 1,
+      text: expect.stringContaining("https://www.stashevskaya.space/"),
+    },
+  });
+  expect(calls.slice(4)).toEqual(
     [
-      "Ссылка на сайт скоро появится.",
       "Ссылка на бесплатный канал скоро появится.",
       "Информация о покупке скоро появится.",
     ].map((text) => ({

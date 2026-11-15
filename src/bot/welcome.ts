@@ -20,7 +20,10 @@ export function registerWelcome(bot: Bot) {
   });
 
   bot.callbackQuery("course_info", async (context) => {
-    await context.answerCallbackQuery("Ссылка на сайт скоро появится.");
+    await context.answerCallbackQuery();
+    await context.reply(
+      "Подробнее об онлайн-курсе «Пластика бёдер с нуля»:\nhttps://www.stashevskaya.space/",
+    );
   });
 
   bot.callbackQuery("free_channel", async (context) => {

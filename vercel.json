@@ -2,7 +2,12 @@
   "git": {
     "deploymentEnabled": { "**": false, "master": true }
   },
+  "crons": [{ "path": "/api/warmup", "schedule": "0 9 * * *" }],
   "functions": {
+    "api/warmup.ts": {
+      "includeFiles": "config/project.yaml",
+      "maxDuration": 60
+    },
     "api/telegram.ts": {
       "includeFiles": "config/project.yaml",
       "maxDuration": 15

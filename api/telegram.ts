@@ -7,6 +7,7 @@ import {
   webhookSecret,
 } from "../src/config.js";
 import { openProductionWaitlist } from "../src/infrastructure/waitlist.js";
+import { openWarmupStore } from "../src/infrastructure/warmup.js";
 import { createWebhook } from "../src/webhook.js";
 
 let handler: ReturnType<typeof createWebhook> | undefined;
@@ -23,11 +24,20 @@ export default async function telegram(request: Request): Promise<Response> {
       const storage = databaseUrl
         ? openProductionWaitlist(databaseUrl)
         : undefined;
+      const warmup =
+        databaseUrl && process.env.VERCEL_ENV === "production"
+          ? openWarmupStore(databaseUrl)
+          : undefined;
       const callback = webhookCallback(
-        createBot(loadToken("production", project), async (entry) => {
-          if (!storage) throw new Error("WAITLIST_DATABASE_URL отсутствует");
-          await storage.save(entry);
-        }),
+        createBot(
+          loadToken("production", project),
+          async (entry) => {
+            if (!storage) throw new Error("WAITLIST_DATABASE_URL отсутствует");
+            await storage.save(entry);
+          },
+          undefined,
+          warmup,
+        ),
         "std/http",
       );
       handler = createWebhook(secret, async (update) => {

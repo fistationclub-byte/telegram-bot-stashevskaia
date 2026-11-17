@@ -1,11 +1,13 @@
 import { closeSync, openSync, utimesSync } from "node:fs";
 import { createBot } from "../bot.js";
 import { loadToken } from "../config.js";
+import { openLocalWaitlist } from "../infrastructure/waitlist.js";
 
 async function main() {
   const activity = ".runtime/activity";
   closeSync(openSync(activity, "a"));
-  const bot = createBot(loadToken("development"), () => {
+  const { save } = openLocalWaitlist(".runtime/waitlist.sqlite");
+  const bot = createBot(loadToken("development"), save, () => {
     const now = new Date();
     utimesSync(activity, now, now);
   });

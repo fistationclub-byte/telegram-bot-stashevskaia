@@ -1,4 +1,5 @@
 import { InlineKeyboard, type Bot } from "grammy";
+import { courseUrl } from "./waitlist.js";
 
 export function registerWelcome(bot: Bot) {
   bot.command("start", async (context) => {
@@ -10,11 +11,11 @@ export function registerWelcome(bot: Bot) {
       ].join("\n\n"),
       {
         reply_markup: new InlineKeyboard()
-          .url("Сайт курса", "https://www.stashevskaya.space/")
+          .url("Сайт курса", courseUrl)
           .row()
           .text("Вступить в бесплатный канал с хореографиями", "free_channel")
           .row()
-          .text("Записаться в список раннего доступа на курс", "buy_course"),
+          .text("Хочу в предзапись на курс", "buy_course"),
       },
     );
   });
@@ -26,12 +27,6 @@ export function registerWelcome(bot: Bot) {
   bot.callbackQuery("free_channel", async (context) => {
     await context.answerCallbackQuery(
       "Ссылка на бесплатный канал скоро появится.",
-    );
-  });
-
-  bot.callbackQuery("buy_course", async (context) => {
-    await context.answerCallbackQuery(
-      "Запись в список раннего доступа скоро откроется.",
     );
   });
 }

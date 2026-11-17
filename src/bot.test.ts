@@ -1,8 +1,10 @@
 import { expect, test } from "vitest";
 import { createBot } from "./bot.js";
+import { openLocalWaitlist } from "./infrastructure/waitlist.js";
 
-test("приветствие показывает три кнопки в отдельных строках, первая ведёт на сайт", async () => {
-  const bot = createBot("123:fake-token");
+test("предзапись показывает тарифы, сохраняет выбор и обновляет запись при смене тарифа", async () => {
+  const { db, save } = openLocalWaitlist(":memory:");
+  const bot = createBot("123:fake-token", save);
   const calls: { method: string; payload: unknown }[] = [];
   bot.botInfo = {
     id: 123,
@@ -38,7 +40,13 @@ test("приветствие показывает три кнопки в отд�
       },
     });
   }
-  for (const data of ["free_channel", "buy_course"]) {
+  for (const data of [
+    "free_channel",
+    "buy_course",
+    "waitlist:self_study",
+    "waitlist:anastasia_feedback",
+    "waitlist:mentor_feedback",
+  ]) {
     await bot.handleUpdate({
       update_id: 2,
       callback_query: {
@@ -73,7 +81,7 @@ test("приветствие показывает три кнопки в отд�
           ],
           [
             {
-              text: "Записаться в список раннего доступа на курс",
+              text: "Хочу в предзапись на курс",
               callback_data: "buy_course",
             },
           ],
@@ -82,13 +90,52 @@ test("приветствие показывает три кнопки в отд�
     },
   });
   expect(calls[1]?.method).toBe("sendMessage");
-  expect(calls.slice(2)).toEqual(
-    [
-      "Ссылка на бесплатный канал скоро появится.",
-      "Запись в список раннего доступа скоро откроется.",
-    ].map((text) => ({
-      method: "answerCallbackQuery",
-      payload: { callback_query_id: "test", text },
-    })),
-  );
+  expect(calls[2]).toMatchObject({
+    method: "answerCallbackQuery",
+    payload: { text: "Ссылка на бесплатный канал скоро появится." },
+  });
+  expect(calls[4]).toMatchObject({
+    method: "sendMessage",
+    payload: {
+      parse_mode: "HTML",
+      text: expect.stringContaining(
+        '<a href="https://www.stashevskaya.space/">ссылке на сайт</a>',
+      ),
+      reply_markup: {
+        inline_keyboard: [
+          [{ text: "Самостоятельный", callback_data: "waitlist:self_study" }],
+          [
+            {
+              text: "С обратной связью от Анастасии",
+              callback_data: "waitlist:anastasia_feedback",
+            },
+          ],
+          [
+            {
+              text: "С обратной связью от куратора",
+              callback_data: "waitlist:mentor_feedback",
+            },
+          ],
+        ],
+      },
+    },
+  });
+  for (const [index, tier] of [
+    [6, "Самостоятельный"],
+    [8, "С обратной связью от Анастасии Сташевской - автора курса"],
+    [10, "С обратной связью от куратора"],
+  ] as const) {
+    expect(calls[index]).toMatchObject({
+      method: "sendMessage",
+      payload: {
+        text: expect.stringContaining(
+          `Супер! Вы в списке раннего доступа на тариф «${tier}»!`,
+        ),
+      },
+    });
+  }
+  expect(
+    db.prepare("SELECT telegram_id, username, tier FROM course_waitlist").all(),
+  ).toEqual([{ telegram_id: 1, username: null, tier: "mentor_feedback" }]);
+  db.close();
 });

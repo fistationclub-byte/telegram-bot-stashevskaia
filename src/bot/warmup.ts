@@ -1,12 +1,9 @@
 import { GrammyError, InlineKeyboard, type Api } from "grammy";
-import { warmupText, type WarmupDay } from "../domain/warmup-content.js";
+import { warmupDays, type WarmupDay } from "../domain/warmup-content.js";
 import { courseUrl, trackedCourseUrl } from "../domain/traffic.js";
 import type { TrafficSource } from "../infrastructure/bot-store.js";
 
 export const warmupTexts = {
-  ...Object.fromEntries(
-    Object.entries(warmupText).map(([day, text]) => [`warmup.${day}`, text]),
-  ),
   "warmup.channel_button": "Хочу ещё бесплатные танцы",
   "warmup.program_button": "Посмотреть программу курса",
   "warmup.course_button": "Узнать о курсе",
@@ -22,6 +19,9 @@ export const warmupTexts = {
 };
 
 export function loadWarmupContent(texts: Record<string, string>) {
+  if (warmupDays.some((day) => !texts[`warmup.${day}`]?.trim())) {
+    throw new Error("Нужны все семь текстов прогрева в Supabase.");
+  }
   const channel = texts["links.channel"]?.trim();
   if (!channel || !/^https:\/\/t\.me\/[\w+/-]+$/.test(channel)) {
     throw new Error("Нужна HTTPS-ссылка на Telegram-канал.");
@@ -42,38 +42,37 @@ export function loadWarmupContent(texts: Record<string, string>) {
 export function warmupMessage(
   day: WarmupDay,
   content: ReturnType<typeof loadWarmupContent>,
-  texts?: Record<string, string>,
+  texts: Record<string, string>,
   source?: TrafficSource,
 ) {
-  const text = texts?.[`warmup.${day}`] ?? warmupText[day];
-  const website = texts
-    ? trackedCourseUrl(texts["links.course"] ?? courseUrl, source)
-    : courseUrl;
+  const text = texts[`warmup.${day}`];
+  if (!text?.trim()) throw new Error("Текст прогрева отсутствует в Supabase.");
+  const website = trackedCourseUrl(texts["links.course"] ?? courseUrl, source);
   const keyboard = new InlineKeyboard();
   if (day === 1 || day === 7)
     keyboard.url(
-      texts?.["warmup.channel_button"] ?? warmupTexts["warmup.channel_button"],
+      texts["warmup.channel_button"] ?? warmupTexts["warmup.channel_button"],
       content.channel,
     );
   if (day === 10)
     keyboard.url(
-      texts?.["warmup.program_button"] ?? warmupTexts["warmup.program_button"],
+      texts["warmup.program_button"] ?? warmupTexts["warmup.program_button"],
       website,
     );
   if (day === 16)
     keyboard.url(
-      texts?.["warmup.course_button"] ?? warmupTexts["warmup.course_button"],
+      texts["warmup.course_button"] ?? warmupTexts["warmup.course_button"],
       website,
     );
   if (day === 19) {
     keyboard
       .text(
-        texts?.["welcome.waitlist"] ?? "Хочу в предзапись на курс",
+        texts["welcome.waitlist"] ?? "Хочу в предзапись на курс",
         "buy_course",
       )
       .row()
       .text(
-        texts?.["warmup.joined_button"] ?? warmupTexts["warmup.joined_button"],
+        texts["warmup.joined_button"] ?? warmupTexts["warmup.joined_button"],
         "warmup:joined",
       );
   }
@@ -94,7 +93,7 @@ export async function sendWarmup(
   telegramId: string,
   day: WarmupDay,
   content: ReturnType<typeof loadWarmupContent>,
-  texts?: Record<string, string>,
+  texts: Record<string, string>,
   source?: TrafficSource,
 ) {
   const message = warmupMessage(day, content, texts, source);

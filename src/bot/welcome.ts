@@ -3,14 +3,18 @@ import { InlineKeyboard, type Bot } from "grammy";
 export function registerWelcome(bot: Bot) {
   bot.command("start", async (context) => {
     await context.reply(
-      "Привет! Здесь можно узнать больше о моём онлайн-курсе, " +
-        "перейти в бесплатный Telegram-канал с хореографиями или выбрать покупку курса.\n\n" +
-        "С чего начнём?",
+      [
+        "Я Настя, преподаватель танцев и автор онлайн-курса «Пластика бёдер с нуля».",
+        "Я помогаю девушкам и женщинам научиться красиво, свободно и уверенно двигаться под музыку — независимо от возраста, комплекции и танцевального опыта.",
+        "Хотите научиться двигать бёдрами свободно и уверенно? У меня есть для вас несколько возможностей: выбирайте, что интересно 👇",
+      ].join("\n\n"),
       {
         reply_markup: new InlineKeyboard()
-          .url("О курсе", "https://www.stashevskaya.space/")
-          .text("Хореографии", "free_channel")
-          .text("Хочу купить", "buy_course"),
+          .url("Посмотреть программу курса", "https://www.stashevskaya.space/")
+          .row()
+          .text("Вступить в бесплатный канал с хореографиями", "free_channel")
+          .row()
+          .text("Записаться в список раннего доступа на курс", "buy_course"),
       },
     );
   });
@@ -26,6 +30,8 @@ export function registerWelcome(bot: Bot) {
   });
 
   bot.callbackQuery("buy_course", async (context) => {
-    await context.answerCallbackQuery("Информация о покупке скоро появится.");
+    await context.answerCallbackQuery(
+      "Запись в список раннего доступа скоро откроется.",
+    );
   });
 }

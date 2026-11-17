@@ -1,7 +1,7 @@
 import { expect, test } from "vitest";
 import { createBot } from "./bot.js";
 
-test("приветствие показывает три кнопки в одном ряду, первая ведёт на сайт", async () => {
+test("приветствие показывает три кнопки в отдельных строках, первая ведёт на сайт", async () => {
   const bot = createBot("123:fake-token");
   const calls: { method: string; payload: unknown }[] = [];
   bot.botInfo = {
@@ -60,9 +60,22 @@ test("приветствие показывает три кнопки в одн�
       reply_markup: {
         inline_keyboard: [
           [
-            { text: "О курсе", url: "https://www.stashevskaya.space/" },
-            { text: "Хореографии", callback_data: "free_channel" },
-            { text: "Хочу купить", callback_data: "buy_course" },
+            {
+              text: "Посмотреть программу курса",
+              url: "https://www.stashevskaya.space/",
+            },
+          ],
+          [
+            {
+              text: "Вступить в бесплатный канал с хореографиями",
+              callback_data: "free_channel",
+            },
+          ],
+          [
+            {
+              text: "Записаться в список раннего доступа на курс",
+              callback_data: "buy_course",
+            },
           ],
         ],
       },
@@ -72,7 +85,7 @@ test("приветствие показывает три кнопки в одн�
   expect(calls.slice(2)).toEqual(
     [
       "Ссылка на бесплатный канал скоро появится.",
-      "Информация о покупке скоро появится.",
+      "Запись в список раннего доступа скоро откроется.",
     ].map((text) => ({
       method: "answerCallbackQuery",
       payload: { callback_query_id: "test", text },

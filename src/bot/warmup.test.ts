@@ -5,9 +5,14 @@ import { warmupDays } from "../domain/warmup-content.js";
 test("семь касаний выводят заданные кнопки и вложения, приглашение только в день 19", () => {
   const channel = "https://t.me/dance_test";
   const content = {
-    day10: "История ученицы",
     channel,
-    videos: { 1: "video1", 4: "video4", 7: "video7", 13: "video13" },
+    videos: {
+      1: "video1",
+      4: "video4",
+      7: "video7",
+      10: "video10",
+      13: "video13",
+    },
     photo: "photo16",
   };
   expect(warmupDays).toEqual([1, 4, 7, 10, 13, 16, 19]);
@@ -16,7 +21,7 @@ test("семь касаний выводят заданные кнопки и в
     "video1",
     "video4",
     "video7",
-    undefined,
+    "video10",
     "video13",
     undefined,
     undefined,
@@ -40,7 +45,9 @@ test("семь касаний выводят заданные кнопки и в
       { text: "Я уже записалась на курс", callback_data: "warmup:joined" },
     ],
   ]);
-  expect(messages[3]?.text).toBe(content.day10);
+  expect(messages[3]?.text).toContain(
+    "Это результаты моих учениц, которые когда-то тоже начинали с нуля.",
+  );
   expect(messages[5]?.photo).toBe(content.photo);
   for (const message of messages) {
     if (message.video || message.photo)

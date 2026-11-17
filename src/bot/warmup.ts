@@ -3,34 +3,28 @@ import { warmupText, type WarmupDay } from "../domain/warmup-content.js";
 import { courseUrl } from "./waitlist.js";
 
 export function loadWarmupContent() {
-  const day10 = process.env.WARMUP_DAY_10_TEXT?.trim();
   const channel = process.env.WARMUP_CHANNEL_URL?.trim();
-  if (
-    !day10 ||
-    day10.length > 4096 ||
-    !channel ||
-    !/^https:\/\/t\.me\/[\w+/-]+$/.test(channel)
-  ) {
-    throw new Error("Нужны текст дня 10 и HTTPS-ссылка на Telegram-канал.");
+  if (!channel || !/^https:\/\/t\.me\/[\w+/-]+$/.test(channel)) {
+    throw new Error("Нужна HTTPS-ссылка на Telegram-канал.");
   }
   const videos = {
     1: process.env.WARMUP_DAY_1_VIDEO,
     4: process.env.WARMUP_DAY_4_VIDEO,
     7: process.env.WARMUP_DAY_7_VIDEO,
+    10: process.env.WARMUP_DAY_10_VIDEO,
     13: process.env.WARMUP_DAY_13_VIDEO,
   };
   if (Object.values(videos).some((video) => !video?.trim())) {
-    throw new Error("Нужны видео для дней 1, 4, 7 и 13.");
+    throw new Error("Нужны видео для дней 1, 4, 7, 10 и 13.");
   }
-  return { day10, channel, videos, photo: process.env.WARMUP_DAY_16_PHOTO };
+  return { channel, videos, photo: process.env.WARMUP_DAY_16_PHOTO };
 }
 
 export function warmupMessage(
   day: WarmupDay,
   content: ReturnType<typeof loadWarmupContent>,
 ) {
-  const text = day === 10 ? content.day10 : warmupText[day];
-  if (!text) throw new Error("Нет текста сообщения");
+  const text = warmupText[day];
   const keyboard = new InlineKeyboard();
   if (day === 1 || day === 7)
     keyboard.url("Хочу ещё бесплатные танцы", content.channel);
@@ -43,7 +37,7 @@ export function warmupMessage(
       .text("Я уже записалась на курс", "warmup:joined");
   }
   const video =
-    day === 1 || day === 4 || day === 7 || day === 13
+    day === 1 || day === 4 || day === 7 || day === 10 || day === 13
       ? content.videos[day]
       : undefined;
   return {

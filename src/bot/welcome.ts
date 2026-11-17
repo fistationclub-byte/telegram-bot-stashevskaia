@@ -13,7 +13,7 @@ export function registerWelcome(bot: Bot) {
         reply_markup: new InlineKeyboard()
           .url("Сайт курса", courseUrl)
           .row()
-          .text("Вступить в бесплатный канал с хореографиями", "free_channel")
+          .text("Бесплатный канал с хореографиями", "free_channel")
           .row()
           .text("Хочу в предзапись на курс", "buy_course"),
       },

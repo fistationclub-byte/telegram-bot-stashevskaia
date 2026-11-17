@@ -61,7 +61,7 @@ test("приветствие показывает три кнопки в отд�
         inline_keyboard: [
           [
             {
-              text: "Посмотреть программу курса",
+              text: "Сайт курса",
               url: "https://www.stashevskaya.space/",
             },
           ],

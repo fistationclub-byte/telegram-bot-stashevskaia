@@ -10,7 +10,7 @@ export function registerWelcome(bot: Bot) {
       ].join("\n\n"),
       {
         reply_markup: new InlineKeyboard()
-          .url("Посмотреть программу курса", "https://www.stashevskaya.space/")
+          .url("Сайт курса", "https://www.stashevskaya.space/")
           .row()
           .text("Вступить в бесплатный канал с хореографиями", "free_channel")
           .row()

@@ -30,7 +30,10 @@ export default async function telegram(request: Request): Promise<Response> {
         process.env.VERCEL_ENV === "production",
       );
       const storage = openProductionWaitlist(config);
-      const warmup = openWarmupStore(config);
+      const warmup =
+        project.production.warmup_enabled && process.env.WARMUP_ENABLED === "1"
+          ? openWarmupStore(config)
+          : undefined;
       const store = openBotStore(config);
       const callback = webhookCallback(
         createBot(

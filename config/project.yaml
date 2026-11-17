@@ -29,6 +29,7 @@ development:
     public_hostname: "" # e.g. dev-bot.example.com; NOT a token
 
 production:
+  warmup_enabled: false
   telegram:
     transport: webhook
     display_name: "" # Telegram display name, e.g. My Bot

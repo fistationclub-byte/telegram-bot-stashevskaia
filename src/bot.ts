@@ -41,9 +41,9 @@ export function createBot(
     });
   }
 
-  registerWelcome(bot, store);
+  registerWelcome(bot, store, !!warmup);
   registerWaitlist(bot, saveWaitlistEntry, store);
-  if (store) registerMailing(bot, store);
+  if (store && warmup) registerMailing(bot, store);
 
   return bot;
 }

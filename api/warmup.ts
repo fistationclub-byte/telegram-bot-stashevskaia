@@ -5,7 +5,7 @@ import {
   sendBroadcast,
   sendWarmup,
 } from "../src/bot/warmup.js";
-import { loadToken } from "../src/config.js";
+import { loadProject, loadToken } from "../src/config.js";
 import { warmupDays } from "../src/domain/warmup-content.js";
 import { openBotStore } from "../src/infrastructure/bot-store.js";
 import { supabaseConfig } from "../src/infrastructure/database.js";
@@ -40,7 +40,10 @@ export default async function warmup(request: Request): Promise<Response> {
     try {
       const texts = await bot.texts();
       let content: ReturnType<typeof loadWarmupContent> | undefined;
-      if (process.env.WARMUP_ENABLED === "1") {
+      if (
+        process.env.WARMUP_ENABLED === "1" &&
+        loadProject().production.warmup_enabled
+      ) {
         try {
           content = loadWarmupContent(texts);
         } catch {

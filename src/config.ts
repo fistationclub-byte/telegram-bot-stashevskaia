@@ -40,6 +40,7 @@ const projectSchema = z
       }),
     }),
     production: z.object({
+      warmup_enabled: z.boolean().default(false),
       telegram: z.object({
         transport: z.literal("webhook"),
         display_name: z.string(),

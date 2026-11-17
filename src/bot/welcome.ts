@@ -18,7 +18,11 @@ export const welcomeTexts = {
   "links.channel": "",
 };
 
-export function registerWelcome(bot: Bot, store?: BotStore) {
+export function registerWelcome(
+  bot: Bot,
+  store?: BotStore,
+  mailingEnabled = false,
+) {
   bot.command("start", async (context) => {
     const user = context.chat.type === "private" ? context.from : undefined;
     const source = user
@@ -39,7 +43,12 @@ export function registerWelcome(bot: Bot, store?: BotStore) {
     keyboard.row().text(text["welcome.waitlist"], "buy_course");
     await context.reply(text["welcome.body"], { reply_markup: keyboard });
 
-    if (store && user && (await store.subscription(user.id)) === undefined) {
+    if (
+      mailingEnabled &&
+      store &&
+      user &&
+      (await store.subscription(user.id)) === undefined
+    ) {
       const prompt = mailingPrompt(text);
       await context.reply(prompt.message, { reply_markup: prompt.keyboard });
     }
@@ -47,7 +56,9 @@ export function registerWelcome(bot: Bot, store?: BotStore) {
 
   bot.command("help", async (context) => {
     const text = { ...welcomeTexts, ...(await store?.texts()) };
-    const mailing = store ? "\n/mailing — настроить подписку на рассылку." : "";
+    const mailing = mailingEnabled
+      ? "\n/mailing — настроить подписку на рассылку."
+      : "";
     await context.reply(text["welcome.help"] + mailing);
   });
 

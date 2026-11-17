@@ -1,4 +1,6 @@
 import { Bot } from "grammy";
+import { registerMailing } from "./bot/mailing.js";
+import type { BotStore } from "./infrastructure/bot-store.js";
 import { registerWaitlist } from "./bot/waitlist.js";
 import type { SaveWaitlistEntry } from "./infrastructure/waitlist.js";
 import type { WarmupAudience } from "./infrastructure/warmup.js";
@@ -9,6 +11,7 @@ export function createBot(
   saveWaitlistEntry: SaveWaitlistEntry,
   recordActivity?: () => void,
   warmup?: WarmupAudience,
+  store?: BotStore,
 ) {
   const bot = new Bot(token);
 
@@ -20,16 +23,6 @@ export function createBot(
   }
 
   if (warmup) {
-    bot.command("start", async (context, next) => {
-      if (context.chat.type === "private" && context.from) {
-        try {
-          await warmup.enroll(context.from.id);
-        } catch {
-          console.error(JSON.stringify({ event: "warmup_enrollment_failed" }));
-        }
-      }
-      await next();
-    });
     bot.callbackQuery("warmup:joined", async (context) => {
       if (context.chat?.type !== "private") {
         await context.answerCallbackQuery("Откройте личный чат с ботом.");
@@ -48,8 +41,9 @@ export function createBot(
     });
   }
 
-  registerWelcome(bot);
-  registerWaitlist(bot, saveWaitlistEntry);
+  registerWelcome(bot, store);
+  registerWaitlist(bot, saveWaitlistEntry, store);
+  if (store) registerMailing(bot, store);
 
   return bot;
 }

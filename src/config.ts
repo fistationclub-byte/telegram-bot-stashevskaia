@@ -48,7 +48,10 @@ const projectSchema = z
         webhook_secret_env: identifier,
         webhook_path: z.literal("/api/telegram"),
       }),
-      hosting: z.object({ provider: z.literal("vercel"), region: z.string() }),
+      hosting: z.object({
+        provider: z.enum(["ishosting", "vercel"]),
+        region: z.string(),
+      }),
     }),
     infrastructure: z.object({
       vps: z.object({ ssh_alias: z.literal("deploy") }),

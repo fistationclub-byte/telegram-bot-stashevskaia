@@ -4,7 +4,13 @@ import type {
   SaveWaitlistEntry,
 } from "../infrastructure/waitlist.js";
 
-export const courseUrl = "https://www.stashevskaya.space/";
+import type { BotStore } from "../infrastructure/bot-store.js";
+import {
+  courseUrl,
+  htmlAttribute,
+  trackedCourseUrl,
+} from "../domain/traffic.js";
+export { courseUrl };
 
 const tiers = {
   self_study: {
@@ -34,20 +40,69 @@ const tierOrder: CourseTier[] = [
   "mentor_feedback",
 ];
 
-export function registerWaitlist(bot: Bot, save: SaveWaitlistEntry) {
+const prompt = [
+  "Отлично! Давайте запишем вас в список раннего доступа на ближайший поток онлайн-курса «Пластика бёдер с нуля»!",
+  'Перед записью обязательно ознакомьтесь с программой курса, форматами участия и стоимостью по <a href="{{course_url}}">ссылке на сайт</a>.',
+  "После этого выберите тариф, который вам больше подходит, нажав на соответствующую кнопку ниже 👇",
+].join("\n\n");
+
+function confirmation(tier: CourseTier) {
+  const paragraphs = [...tiers[tier].confirmation];
+  if (tier !== "self_study") {
+    paragraphs.push(
+      "На этом тарифе всего 10 мест, поэтому участницы списка раннего доступа первыми получат возможность записаться.",
+      "Как только откроется набор, я пришлю вам всю информацию - не останавливайте этот чат.",
+    );
+  }
+  paragraphs.push(
+    "А пока оставайтесь на связи — впереди будет много интересного!",
+  );
+  return paragraphs.join("\n\n");
+}
+
+export const waitlistTexts = {
+  "waitlist.prompt": prompt,
+  "waitlist.private": "Для предзаписи откройте личный чат с ботом.",
+  "waitlist.error":
+    "Не удалось сохранить предзапись. Пожалуйста, выберите тариф ещё раз чуть позже.",
+  ...Object.fromEntries(
+    tierOrder.flatMap((tier) => [
+      [`waitlist.button.${tier}`, tiers[tier].button],
+      [`waitlist.confirmation.${tier}`, confirmation(tier)],
+    ]),
+  ),
+};
+
+export function registerWaitlist(
+  bot: Bot,
+  save: SaveWaitlistEntry,
+  store?: BotStore,
+) {
   bot.callbackQuery("buy_course", async (context) => {
     await context.answerCallbackQuery();
+    const text: Record<string, string> = {
+      ...waitlistTexts,
+      ...(await store?.texts()),
+    };
+    const url = store
+      ? trackedCourseUrl(
+          text["links.course"] ?? courseUrl,
+          await store.courseSource(context.from.id),
+        )
+      : courseUrl;
     const keyboard = new InlineKeyboard(
       tierOrder.map((tier) => [
-        { text: tiers[tier].button, callback_data: `waitlist:${tier}` },
+        {
+          text: text[`waitlist.button.${tier}`] ?? tiers[tier].button,
+          callback_data: `waitlist:${tier}`,
+        },
       ]),
     );
     await context.reply(
-      [
-        "Отлично! Давайте запишем вас в список раннего доступа на ближайший поток онлайн-курса «Пластика бёдер с нуля»!",
-        `Перед записью обязательно ознакомьтесь с программой курса, форматами участия и стоимостью по <a href="${courseUrl}">ссылке на сайт</a>.`,
-        "После этого выберите тариф, который вам больше подходит, нажав на соответствующую кнопку ниже 👇",
-      ].join("\n\n"),
+      (text["waitlist.prompt"] ?? prompt).replaceAll(
+        "{{course_url}}",
+        htmlAttribute(url),
+      ),
       {
         reply_markup: keyboard,
         parse_mode: "HTML",
@@ -58,15 +113,20 @@ export function registerWaitlist(bot: Bot, save: SaveWaitlistEntry) {
 
   for (const tier of tierOrder) {
     bot.callbackQuery(`waitlist:${tier}`, async (context) => {
+      const text: Record<string, string> = {
+        ...waitlistTexts,
+        ...(await store?.texts()),
+      };
       if (context.chat?.type !== "private") {
         await context.answerCallbackQuery(
-          "Для предзаписи откройте личный чат с ботом.",
+          text["waitlist.private"] ?? waitlistTexts["waitlist.private"],
         );
         return;
       }
 
       await context.answerCallbackQuery();
       try {
+        await store?.register(context.from, "");
         await save({
           telegramId: context.from.id,
           username: context.from.username ?? null,
@@ -75,22 +135,13 @@ export function registerWaitlist(bot: Bot, save: SaveWaitlistEntry) {
       } catch {
         console.error(JSON.stringify({ event: "waitlist_save_failed" }));
         await context.reply(
-          "Не удалось сохранить предзапись. Пожалуйста, выберите тариф ещё раз чуть позже.",
+          text["waitlist.error"] ?? waitlistTexts["waitlist.error"],
         );
         return;
       }
-
-      const paragraphs = [...tiers[tier].confirmation];
-      if (tier !== "self_study") {
-        paragraphs.push(
-          "На этом тарифе всего 10 мест, поэтому участницы списка раннего доступа первыми получат возможность записаться.",
-          "Как только откроется набор, я пришлю вам всю информацию - не останавливайте этот чат.",
-        );
-      }
-      paragraphs.push(
-        "А пока оставайтесь на связи — впереди будет много интересного!",
+      await context.reply(
+        text[`waitlist.confirmation.${tier}`] ?? confirmation(tier),
       );
-      await context.reply(paragraphs.join("\n\n"));
     });
   }
 }

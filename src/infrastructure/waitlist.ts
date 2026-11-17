@@ -1,6 +1,6 @@
 import { chmodSync, closeSync, openSync } from "node:fs";
 import { DatabaseSync } from "node:sqlite";
-import pg from "pg";
+import { openDatabase, type DatabaseConfig } from "./database.js";
 
 export type CourseTier =
   "self_study" | "anastasia_feedback" | "mentor_feedback";
@@ -56,30 +56,14 @@ export function openLocalWaitlist(path: string) {
   };
 }
 
-export function openProductionWaitlist(connectionString: string) {
-  const pool = new pg.Pool({
-    connectionString,
-    max: 1,
-    connectionTimeoutMillis: 3_000,
-    query_timeout: 4_000,
-    statement_timeout: 4_000,
-  });
-  pool.on("error", () =>
-    console.error(
-      JSON.stringify({ event: "waitlist_database_connection_failed" }),
-    ),
-  );
-
+export function openProductionWaitlist(config: DatabaseConfig) {
+  const pool = openDatabase(config);
+  const sql = upsert.replaceAll("course_waitlist", "bot.course_waitlist");
   return {
-    initialize: () => pool.query(waitlistSchema),
     close: () => pool.end(),
     save: async ({ telegramId, username, tier }: WaitlistEntry) => {
-      await pool.query(upsert, [
-        telegramId,
-        username,
-        tier,
-        new Date().toISOString(),
-      ]);
+      const now = new Date().toISOString();
+      await pool.query(sql, [telegramId, username, tier, now]);
     },
   };
 }

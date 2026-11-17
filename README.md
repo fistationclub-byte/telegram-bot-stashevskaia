@@ -18,6 +18,6 @@
 
 `pnpm lint`, `pnpm format:check`, `pnpm typecheck`, `pnpm test`, `pnpm build`. Тесты используют имитацию Telegram API.
 
-Из рабочей ветки открывайте PR в `development`. После проверки выпуска открывайте PR из `development` в `master`. Когда Git-интеграция настроена, Vercel выпускает бота после слияния в `master`. Порядок подключения и проверки описан в [инструкции Vercel](deploy/vercel/README.md).
+Из рабочей ветки открывайте PR в `development`. После проверки выпуска открывайте PR из `development` в `master`. Инструкции по развёртыванию и настройке рассылок находятся в [документации IsHosting](deploy/vps/README.md).
 
-Проверьте перед выпуском, что репозиторий подключён, у dev и prod отдельные боты и токены, правила GitHub включены, Vercel настроен и Telegram подтвердил production-вебхук. Собственный домен нужен только для будущих сценариев, где он предусмотрен.
+Пример отслеживания источника: посетитель TikTok запускает бота по ссылке `https://t.me/stashevskaia_bot?start=tiktok`. Бот сохраняет первый известный источник в Supabase и добавляет к ссылкам на сайт `source1=tiktok&source2=telegram`, `utm_source=tiktok&utm_medium=telegram`. Для новых кодов и кампаний используйте таблицу `bot.traffic_sources`. Тестовый бот с обычным локальным запуском использует отдельный SQLite-файл для предзаписи.

@@ -37,7 +37,7 @@ production:
     webhook_secret_env: TELEGRAM_WEBHOOK_SECRET
     webhook_path: /api/telegram
   hosting:
-    provider: vercel
+    provider: ishosting
     region: "" # choose deliberately if needed
 
 infrastructure:

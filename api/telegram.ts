@@ -8,6 +8,8 @@ import {
 } from "../src/config.js";
 import { openProductionWaitlist } from "../src/infrastructure/waitlist.js";
 import { openWarmupStore } from "../src/infrastructure/warmup.js";
+import { supabaseConfig } from "../src/infrastructure/database.js";
+import { openBotStore } from "../src/infrastructure/bot-store.js";
 import { createWebhook } from "../src/webhook.js";
 
 let handler: ReturnType<typeof createWebhook> | undefined;
@@ -20,23 +22,23 @@ export default async function telegram(request: Request): Promise<Response> {
         project.production.telegram.webhook_secret_env,
         webhookSecret,
       );
-      const databaseUrl = process.env.WAITLIST_DATABASE_URL;
-      const storage = databaseUrl
-        ? openProductionWaitlist(databaseUrl)
-        : undefined;
-      const warmup =
-        databaseUrl && process.env.VERCEL_ENV === "production"
-          ? openWarmupStore(databaseUrl)
-          : undefined;
+      if (process.env.VERCEL_ENV && process.env.VERCEL_ENV !== "production") {
+        return new Response(null, { status: 503 });
+      }
+      const config = supabaseConfig(
+        process.env,
+        process.env.VERCEL_ENV === "production",
+      );
+      const storage = openProductionWaitlist(config);
+      const warmup = openWarmupStore(config);
+      const store = openBotStore(config);
       const callback = webhookCallback(
         createBot(
           loadToken("production", project),
-          async (entry) => {
-            if (!storage) throw new Error("WAITLIST_DATABASE_URL отсутствует");
-            await storage.save(entry);
-          },
+          storage.save,
           undefined,
           warmup,
+          store,
         ),
         "std/http",
       );

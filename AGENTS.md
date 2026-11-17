@@ -35,4 +35,8 @@ This repository contains a Telegram bot written in TypeScript. The primary opera
 - Plan scheduled dispatch through Supabase Cron. Support general campaigns to opted-in recipients and personalized sequences based on each user's registration time and subscription state. Honor opt-outs and the existing campaign pause before sending.
 - Keep explicit, versioned database migrations in the repository. Alembic is the owner's suggested option. Choose the migration tool when implementing the integration and keep schema changes reproducible.
 
+## Deferred video storage
+
+- When requested, use a private Telegram channel as the media library for the bot. Keep master copies separately. Store only the Telegram `file_id` and its mapping to the message in Supabase. Send the video directly from the bot with the text and buttons from Supabase. Test and production bots need their own file IDs. Do not create a channel or implement the upload workflow until requested.
+
 If a task asks to violate an invariant, identify the conflict and seek specific user approval instead of silently breaking it.

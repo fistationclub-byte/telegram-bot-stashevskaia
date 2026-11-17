@@ -16,16 +16,23 @@ This repository contains a Telegram bot written in TypeScript. The primary opera
 
 - TypeScript strict, **no `any`** (including `as any`), explicit boundary validation, sound types, modular architecture, small functions and focused modules.
 - Node.js 24.x LTS, pnpm with committed lockfile, grammY, Vitest, ESLint, Prettier; use Zod for runtime validation at untrusted boundaries when appropriate. Avoid framework proliferation.
-- Production: **Vercel Node.js Functions**, Telegram **webhook**, never long polling. Local development: Docker Compose with a **separate development bot token** and long polling by default. No secret/shared state between environments.
+- Planned production host: **IsHosting** with a Telegram **webhook**. Vercel is deferred while account access is unreliable. Existing Vercel code is historical until the deployment is migrated. Local development: Docker Compose with a **separate development bot token** and long polling by default. No secret/shared state between environments.
 - Keep framework entry points thin; put Telegram orchestration in `src/bot`, business rules in `src/domain`, integrations in `src/infrastructure`. No flat pile of files, no global mutable conversation state.
 - Use minimal, supported Docker images (prefer pinned `node:24-bookworm-slim` with digest for reproducibility, multi-stage production images); no bloated full default Node image. Evaluate Alpine only after compatibility testing. `.dockerignore` required.
 - Docker development sessions must stop automatically after configured inactivity. Watchdog runs **on the host** and scopes `docker compose down` to this project's unique Compose project name. Never mount `/var/run/docker.sock` into a container just to perform shutdown. Do not stop unrelated containers.
 - Git branches: production `master` (not `main`); integration `development`; work on `feat/*`, `fix/*`, `refactor/*`. Code flows feature → PR to `development` → PR from `development` to `master`. Never push directly to `master`; no direct merges to `master` in a local clone. Use `gh` when authenticated.
-- CI: lint, format, typecheck, tests, build on PRs to `development` and `master`. **No automatic deployment for `development` in v1**. Production deployment after merge into `master`, preferably via Vercel Git integration; no second duplicate deploy mechanism.
+- CI: lint, format, typecheck, tests, build on PRs to `development` and `master`. **No automatic deployment for `development` in v1**. Release from `master`. Design the production deployment for IsHosting when explicitly requested.
 - Treat Vercel previews as **unsafe for production tokens**. Configure preview env without production `BOT_TOKEN` or skip previews, and never register preview URLs as the production bot webhook.
-- Only production on Vercel at first. Reserve infrastructure under `deploy/vercel`, `deploy/local`, `deploy/vps`, `deploy/cloudflare-tunnel`, `deploy/terraform`. Do not deploy to VPS or provision Terraform until explicitly requested.
+- Deploy to IsHosting or provision infrastructure only when explicitly requested.
 - VPS SSH alias `deploy` is already configured in the operator's `~/.ssh/config` and is expected to refer to IsHosting. Verify the SSH host identity before use. Never assume that a command on the VPS is safe; don't modify unrelated services.
 - `config/project.yaml` contains **non-secret** application/environment settings. Secrets live in ignored environment files or platform secret stores, with a `.env.example` documenting names only.
 - Prefer tests with mocked grammY API and webhook/request adapters; tests must not contact real Telegram unless they are clearly labeled manual integration tests.
+
+## Supabase and mailing architecture
+
+- Use Supabase project `fistationclub-byte` at `https://nkmroabbxywwowfpaevm.supabase.co`. The owner signs in through GitHub. Keep database credentials and API keys in secret storage.
+- Store editable bot texts, campaign content and schedules, recipient lists, early access registrations, subscription choices and delivery progress in Supabase. Store each user's Telegram ID and display name (first name and optional last name). Keep Telegram username in a separate optional column.
+- Plan scheduled dispatch through Supabase Cron. Support general campaigns to opted-in recipients and personalized sequences based on each user's registration time and subscription state. Honor opt-outs and the existing campaign pause before sending.
+- Keep explicit, versioned database migrations in the repository. Alembic is the owner's suggested option. Choose the migration tool when implementing the integration and keep schema changes reproducible.
 
 If a task asks to violate an invariant, identify the conflict and seek specific user approval instead of silently breaking it.

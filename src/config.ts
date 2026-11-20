@@ -50,7 +50,7 @@ const projectSchema = z
         webhook_path: z.literal("/api/telegram"),
       }),
       hosting: z.object({
-        provider: z.enum(["ishosting", "vercel"]),
+        provider: z.enum(["supabase", "ishosting", "vercel"]),
         region: z.string(),
       }),
     }),

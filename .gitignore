@@ -15,3 +15,5 @@ tmp/
 .DS_Store
 
 supabase/.temp/
+
+supabase/functions/telegram-bot/handler.js

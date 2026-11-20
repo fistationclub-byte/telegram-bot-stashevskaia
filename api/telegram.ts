@@ -6,7 +6,7 @@ import {
   readSecret,
   webhookSecret,
 } from "../src/config.js";
-import { openProductionWaitlist } from "../src/infrastructure/waitlist.js";
+import { openProductionWaitlist } from "../src/infrastructure/production-waitlist.js";
 import { openWarmupStore } from "../src/infrastructure/warmup.js";
 import { supabaseConfig } from "../src/infrastructure/database.js";
 import { openBotStore } from "../src/infrastructure/bot-store.js";

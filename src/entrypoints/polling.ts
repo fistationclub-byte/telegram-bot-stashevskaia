@@ -1,7 +1,7 @@
 import { closeSync, openSync, utimesSync } from "node:fs";
 import { createBot } from "../bot.js";
 import { loadToken } from "../config.js";
-import { openProductionWaitlist } from "../infrastructure/waitlist.js";
+import { openProductionWaitlist } from "../infrastructure/production-waitlist.js";
 import { openBotStore } from "../infrastructure/bot-store.js";
 import { supabaseConfig } from "../infrastructure/database.js";
 

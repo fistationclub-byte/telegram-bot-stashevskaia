@@ -1,0 +1,7 @@
+{
+  "imports": {
+    "grammy": "npm:grammy@1.46.0/web",
+    "pg": "npm:pg@8.23.1",
+    "zod": "npm:zod@4.6.7"
+  }
+}

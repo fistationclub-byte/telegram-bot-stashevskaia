@@ -1,6 +1,5 @@
 import { chmodSync, closeSync, openSync } from "node:fs";
 import { DatabaseSync } from "node:sqlite";
-import { openDatabase, type DatabaseConfig } from "./database.js";
 
 export type CourseTier =
   "self_study" | "anastasia_feedback" | "mentor_feedback";
@@ -56,14 +55,4 @@ export function openLocalWaitlist(path: string) {
   };
 }
 
-export function openProductionWaitlist(config: DatabaseConfig) {
-  const pool = openDatabase(config);
-  const sql = upsert.replaceAll("course_waitlist", "bot.course_waitlist");
-  return {
-    close: () => pool.end(),
-    save: async ({ telegramId, username, tier }: WaitlistEntry) => {
-      const now = new Date().toISOString();
-      await pool.query(sql, [telegramId, username, tier, now]);
-    },
-  };
-}
+export { openProductionWaitlist } from "./production-waitlist.js";

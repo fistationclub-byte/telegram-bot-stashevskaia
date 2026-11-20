@@ -14,3 +14,5 @@ tmp/
 
 .agents/
 tasks/
+
+supabase/functions/telegram-bot/handler.js

@@ -11,7 +11,7 @@ async function main() {
   const config = supabaseConfig();
   const storage = openProductionWaitlist(config);
   const store = openBotStore(config);
-  await store.texts();
+  await store.texts(["welcome.body"]);
   const bot = createBot(
     loadToken("development"),
     storage.save,

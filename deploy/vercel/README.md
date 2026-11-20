@@ -1,10 +1,5 @@
-# Выпуск бота через Vercel
+# Резервный вариант выпуска через Vercel
 
-1. В Vercel выберите **Add New → Project**, затем импортируйте существующий репозиторий GitHub. В настройках проекта выберите ветку `master` для Production и Node.js 24.x. Production обновляется при слиянии PR в эту ветку.
-2. В **Settings → Environment Variables** добавьте `TELEGRAM_PROD_BOT_TOKEN` для отдельного бота из @BotFather и `TELEGRAM_WEBHOOK_SECRET` со случайным значением из букв, цифр, дефисов или подчёркиваний. Для обеих переменных выберите только **Production**. Проверьте область видимости в списке. В репозитории автоматические сборки Vercel включены для `master`. Сверьте это в истории Deployments при первом PR.
-3. После успешного, согласованного выпуска используйте адрес production-проекта с путём `/api/telegram`. В отдельном локальном файле `.env.production.local` сохраните токен, тот же секрет и `TELEGRAM_PROD_WEBHOOK_URL` с полным HTTPS-адресом. Из корня проекта выполните `node --env-file=.env.production.local deploy/vercel/webhook.mjs set`. Успех подтверждается строкой «Telegram подтвердил адрес вебхука».
-4. Для проверки без изменения настроек выполните `node --env-file=.env.production.local deploy/vercel/webhook.mjs status` и отправьте production-боту `/start`. При ошибке проверьте состояние выпуска, полный адрес и совпадение секрета. В сообщениях о проблеме используйте только статус и текст ошибки.
+Основной хостинг проекта — [IsHosting](../vps/README.md). Если решение изменится, подключите репозиторий GitHub к Vercel с production-веткой `master` и Node.js 24.x. Поместите production-токен Telegram, секрет вебхука, параметры ограниченной роли Supabase, `CRON_SECRET` и настройки рассылки только в окружение **Production**. Для коротких серверных вызовов можно задать `SUPABASE_TP_URL` с данными ограниченной роли и портом 6543.
 
-## Защита веток GitHub
-
-Откройте **Settings → Rules → Rulesets → New branch ruleset**. Выберите Active и ветку `master`. Включите **Require a pull request before merging**, **Require status checks to pass** (проверка CI **checks** появится после первого запуска), **Block force pushes** и **Restrict deletions**. Оставьте список обхода пустым, если это доступно. Сохраните правило и проверьте, что оно помечено Active и применяется к `master`. Аналогично можно настроить `development`. Для выпуска открывайте PR из `development` в `master`. Если GitHub не даёт сохранить правило, проверьте права администратора и доступность rulesets для тарифа.
+Используйте вебхук `/api/telegram` и обработчик Supabase Cron `/api/warmup`. Отдельный Vercel Cron не требуется. После выпуска обновите URL в Vault, проверьте HTTPS и зарегистрируйте вебхук.

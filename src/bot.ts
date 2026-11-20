@@ -1,6 +1,18 @@
-import { Bot, InlineKeyboard } from "grammy";
+import { Bot } from "grammy";
+import { registerMailing } from "./bot/mailing.js";
+import type { BotStore } from "./infrastructure/bot-store.js";
+import { registerWaitlist } from "./bot/waitlist.js";
+import type { SaveWaitlistEntry } from "./infrastructure/waitlist.js";
+import type { WarmupAudience } from "./infrastructure/warmup.js";
+import { registerWelcome } from "./bot/welcome.js";
 
-export function createBot(token: string, recordActivity?: () => void) {
+export function createBot(
+  token: string,
+  saveWaitlistEntry: SaveWaitlistEntry,
+  recordActivity?: () => void,
+  warmup?: WarmupAudience,
+  store?: BotStore,
+) {
   const bot = new Bot(token);
 
   if (recordActivity) {
@@ -10,24 +22,28 @@ export function createBot(token: string, recordActivity?: () => void) {
     });
   }
 
-  bot.command("start", async (context) => {
-    await context.reply(
-      "Привет! Нажмите кнопку, чтобы проверить работу бота.",
-      {
-        reply_markup: new InlineKeyboard().text("Проверить", "check"),
-      },
-    );
-  });
+  if (warmup) {
+    bot.callbackQuery("warmup:joined", async (context) => {
+      if (context.chat?.type !== "private") {
+        await context.answerCallbackQuery("Откройте личный чат с ботом.");
+        return;
+      }
+      try {
+        await warmup.markJoined(context.from.id);
+      } catch {
+        console.error(JSON.stringify({ event: "warmup_joined_failed" }));
+        await context.answerCallbackQuery(
+          "Не удалось сохранить ответ. Попробуйте ещё раз.",
+        );
+        return;
+      }
+      await context.answerCallbackQuery("Спасибо, отметила!");
+    });
+  }
 
-  bot.command("help", async (context) => {
-    await context.reply(
-      "/start — открыть кнопку проверки\n/help — показать подсказку",
-    );
-  });
-
-  bot.callbackQuery("check", async (context) => {
-    await context.answerCallbackQuery("Бот работает!");
-  });
+  registerWelcome(bot, store, !!warmup);
+  registerWaitlist(bot, saveWaitlistEntry, store);
+  if (store && warmup) registerMailing(bot, store);
 
   return bot;
 }

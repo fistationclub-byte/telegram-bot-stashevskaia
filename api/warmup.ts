@@ -9,6 +9,7 @@ import { loadProject, loadToken } from "../src/config.js";
 import { warmupDays } from "../src/domain/warmup-content.js";
 import { openBotStore } from "../src/infrastructure/bot-store.js";
 import { supabaseConfig } from "../src/infrastructure/database.js";
+import { telegramClientOptions } from "../src/infrastructure/telegram-client.js";
 import { openWarmupStore } from "../src/infrastructure/warmup.js";
 
 export default async function warmup(request: Request): Promise<Response> {
@@ -50,7 +51,8 @@ export default async function warmup(request: Request): Promise<Response> {
           console.error(JSON.stringify({ event: "warmup_content_incomplete" }));
         }
       }
-      const api = new Api(loadToken("production"), { timeoutSeconds: 5 });
+      const token = loadToken("production");
+      const api = new Api(token, telegramClientOptions(token));
       const cutoff = performance.now() + 25_000;
       let processed = 0;
       while (

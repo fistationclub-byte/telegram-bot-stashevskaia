@@ -10,6 +10,7 @@ import { openProductionWaitlist } from "../src/infrastructure/waitlist.js";
 import { openWarmupStore } from "../src/infrastructure/warmup.js";
 import { supabaseConfig } from "../src/infrastructure/database.js";
 import { openBotStore } from "../src/infrastructure/bot-store.js";
+import { telegramClientOptions } from "../src/infrastructure/telegram-client.js";
 import { createWebhook } from "../src/webhook.js";
 
 let handler: ReturnType<typeof createWebhook> | undefined;
@@ -35,13 +36,15 @@ export default async function telegram(request: Request): Promise<Response> {
           ? openWarmupStore(config)
           : undefined;
       const store = openBotStore(config);
+      const token = loadToken("production", project);
       const callback = webhookCallback(
         createBot(
-          loadToken("production", project),
+          token,
           storage.save,
           undefined,
           warmup,
           store,
+          telegramClientOptions(token),
         ),
         "std/http",
       );

@@ -1,4 +1,4 @@
-import { Bot } from "grammy";
+import { Bot, type ApiClientOptions } from "grammy";
 import { registerMailing } from "./bot/mailing.js";
 import type { BotStore } from "./infrastructure/bot-store.js";
 import { registerWaitlist } from "./bot/waitlist.js";
@@ -12,8 +12,9 @@ export function createBot(
   recordActivity?: () => void,
   warmup?: WarmupAudience,
   store?: BotStore,
+  client?: ApiClientOptions,
 ) {
-  const bot = new Bot(token);
+  const bot = new Bot(token, client ? { client } : {});
 
   if (recordActivity) {
     bot.on(["message", "callback_query"], async (_context, next) => {

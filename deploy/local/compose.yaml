@@ -7,6 +7,8 @@ services:
       - ../../.env.supabase.runtime
     environment:
       - "${BOT_TOKEN_ENV:-TELEGRAM_DEV_BOT_TOKEN}"
+    extra_hosts:
+      - "api.telegram.org:149.154.167.220"
     user: "${BOT_UID:-1000}:${BOT_GID:-1000}"
     volumes:
       - ../../.runtime:/app/.runtime

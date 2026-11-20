@@ -44,4 +44,4 @@ createServer(async (request, response) => {
     console.error(JSON.stringify({ event: "request_failed" }));
     response.writeHead(500).end();
   }
-}).listen(Number(process.env.PORT ?? 3000), "127.0.0.1");
+}).listen(Number(process.env.PORT ?? 3000), process.env.HOST ?? "127.0.0.1");

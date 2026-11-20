@@ -1,0 +1,17 @@
+.env
+.env.*
+!.env.example
+node_modules/
+dist/
+coverage/
+.runtime/
+tmp/
+.vercel/
+.terraform/
+*.tsbuildinfo
+
+.pnpm-store/
+
+.DS_Store
+
+supabase/.temp/

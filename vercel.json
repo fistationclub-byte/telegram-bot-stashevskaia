@@ -1,0 +1,15 @@
+{
+  "git": {
+    "deploymentEnabled": { "**": false, "master": true }
+  },
+  "functions": {
+    "api/warmup.ts": {
+      "includeFiles": "config/**",
+      "maxDuration": 60
+    },
+    "api/telegram.ts": {
+      "includeFiles": "config/**",
+      "maxDuration": 15
+    }
+  }
+}

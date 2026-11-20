@@ -41,7 +41,6 @@ test("предзапись показывает тарифы, сохраняет
     });
   }
   for (const data of [
-    "free_channel",
     "buy_course",
     "waitlist:self_study",
     "waitlist:anastasia_feedback",
@@ -76,7 +75,7 @@ test("предзапись показывает тарифы, сохраняет
           [
             {
               text: "Бесплатный канал с хореографиями",
-              callback_data: "free_channel",
+              url: "https://t.me/bundachoreo",
             },
           ],
           [
@@ -90,11 +89,7 @@ test("предзапись показывает тарифы, сохраняет
     },
   });
   expect(calls[1]?.method).toBe("sendMessage");
-  expect(calls[2]).toMatchObject({
-    method: "answerCallbackQuery",
-    payload: { text: "Ссылка на бесплатный канал скоро появится." },
-  });
-  expect(calls[4]).toMatchObject({
+  expect(calls[3]).toMatchObject({
     method: "sendMessage",
     payload: {
       parse_mode: "HTML",
@@ -121,9 +116,9 @@ test("предзапись показывает тарифы, сохраняет
     },
   });
   for (const [index, tier] of [
-    [6, "Самостоятельный"],
-    [8, "С обратной связью от Анастасии Сташевской - автора курса"],
-    [10, "С обратной связью от куратора"],
+    [5, "Самостоятельный"],
+    [7, "С обратной связью от Анастасии Сташевской - автора курса"],
+    [9, "С обратной связью от куратора"],
   ] as const) {
     expect(calls[index]).toMatchObject({
       method: "sendMessage",

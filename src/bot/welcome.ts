@@ -15,7 +15,7 @@ export const welcomeTexts = {
   "welcome.help": "/start — открыть меню курса и бесплатного канала.",
   "welcome.channel_pending": "Ссылка на бесплатный канал скоро появится.",
   "links.course": courseUrl,
-  "links.channel": "",
+  "links.channel": "https://t.me/bundachoreo",
 };
 
 export function registerWelcome(

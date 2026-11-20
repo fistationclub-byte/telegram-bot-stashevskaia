@@ -22,7 +22,7 @@ export interface BotStore {
   courseSource(id: number | string): Promise<TrafficSource | undefined>;
   subscription(id: number): Promise<boolean | undefined>;
   subscribe(user: TelegramProfile, subscribed: boolean): Promise<void>;
-  texts(): Promise<Record<string, string>>;
+  texts(keys?: readonly string[]): Promise<Record<string, string>>;
 }
 
 const upsertUser = `
@@ -93,11 +93,24 @@ export function openBotStore(config: DatabaseConfig) {
         [...values(user, null), subscribed],
       );
     },
-    async texts() {
-      const { rows } = await pool.query<{ key: string; text: string }>(
-        "SELECT key, text FROM bot.bot_messages",
-      );
-      return Object.fromEntries(rows.map(({ key, text }) => [key, text]));
+    async texts(keys?: readonly string[]) {
+      const texts: Record<string, string> = {};
+      let lastKey = "";
+      const requested = keys ? new Set(keys).size : undefined;
+      for (;;) {
+        const { rows } = await pool.query<{ key: string; text: string }>(
+          `SELECT key, text FROM bot.bot_messages
+           WHERE key > $1 AND ($2::text[] IS NULL OR key = ANY($2))
+           ORDER BY key LIMIT 2`,
+          [lastKey, keys ?? null],
+        );
+        for (const row of rows) texts[row.key] = row.text;
+        const last = rows.at(-1);
+        if (!last || rows.length < 2 || Object.keys(texts).length === requested)
+          break;
+        lastKey = last.key;
+      }
+      return texts;
     },
   } satisfies BotStore & { close: () => Promise<void> };
 }

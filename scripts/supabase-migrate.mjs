@@ -16,7 +16,10 @@ const settings = supabaseConfig({
   SUPABASE_PASS:
     process.env.SUPABASE_MIGRATION_PASS ?? process.env.SUPABASE_PASS,
 });
-const pool = openDatabase({ ...settings, statement_timeout: 30_000 }, 1);
+const pool = openDatabase(
+  { ...settings, statement_timeout: 30_000, query_timeout: 30_000 },
+  1,
+);
 let connection;
 try {
   connection = await pool.connect();

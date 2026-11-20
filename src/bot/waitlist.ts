@@ -82,7 +82,11 @@ export function registerWaitlist(
     await context.answerCallbackQuery();
     const text: Record<string, string> = {
       ...waitlistTexts,
-      ...(await store?.texts()),
+      ...(await store?.texts([
+        "waitlist.prompt",
+        "links.course",
+        ...tierOrder.map((tier) => `waitlist.button.${tier}`),
+      ])),
     };
     const url = store
       ? trackedCourseUrl(
@@ -115,7 +119,11 @@ export function registerWaitlist(
     bot.callbackQuery(`waitlist:${tier}`, async (context) => {
       const text: Record<string, string> = {
         ...waitlistTexts,
-        ...(await store?.texts()),
+        ...(await store?.texts([
+          "waitlist.private",
+          "waitlist.error",
+          `waitlist.confirmation.${tier}`,
+        ])),
       };
       if (context.chat?.type !== "private") {
         await context.answerCallbackQuery(

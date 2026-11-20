@@ -28,7 +28,17 @@ export function registerWelcome(
     const source = user
       ? await store?.register(user, context.match)
       : undefined;
-    const text = { ...welcomeTexts, ...(await store?.texts()) };
+    const text = {
+      ...welcomeTexts,
+      ...(await store?.texts([
+        "welcome.body",
+        "welcome.course",
+        "welcome.channel",
+        "welcome.waitlist",
+        "links.course",
+        "links.channel",
+      ])),
+    };
     const website = store
       ? trackedCourseUrl(text["links.course"], source)
       : text["links.course"];
@@ -55,7 +65,7 @@ export function registerWelcome(
   });
 
   bot.command("help", async (context) => {
-    const text = { ...welcomeTexts, ...(await store?.texts()) };
+    const text = { ...welcomeTexts, ...(await store?.texts(["welcome.help"])) };
     const mailing = mailingEnabled
       ? "\n/mailing — настроить подписку на рассылку."
       : "";
@@ -63,7 +73,10 @@ export function registerWelcome(
   });
 
   bot.callbackQuery("free_channel", async (context) => {
-    const text = { ...welcomeTexts, ...(await store?.texts()) };
+    const text = {
+      ...welcomeTexts,
+      ...(await store?.texts(["links.channel", "welcome.channel_pending"])),
+    };
     await context.answerCallbackQuery(
       text["links.channel"] ? undefined : text["welcome.channel_pending"],
     );

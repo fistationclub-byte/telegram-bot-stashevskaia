@@ -1,0 +1,27 @@
+services:
+  bot:
+    build:
+      context: ../..
+      dockerfile: deploy/local/Dockerfile
+    command: ["node", "dist/src/entrypoints/webhook.js"]
+    env_file: ../../.env.production.runtime
+    environment:
+      HOST: 0.0.0.0
+      PORT: 3000
+      NODE_ENV: production
+      MAILING_ENABLED: "0"
+      WARMUP_ENABLED: "0"
+    restart: unless-stopped
+    init: true
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    cpus: 0.5
+    mem_limit: 256m
+    networks:
+      gateway:
+        aliases: [telegram-course-bot]
+networks:
+  gateway:
+    external: true
+    name: hip-flow-studio_default

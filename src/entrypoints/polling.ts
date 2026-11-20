@@ -1,16 +1,27 @@
 import { closeSync, openSync, utimesSync } from "node:fs";
 import { createBot } from "../bot.js";
 import { loadToken } from "../config.js";
-import { openLocalWaitlist } from "../infrastructure/waitlist.js";
+import { openProductionWaitlist } from "../infrastructure/waitlist.js";
+import { openBotStore } from "../infrastructure/bot-store.js";
+import { supabaseConfig } from "../infrastructure/database.js";
 
 async function main() {
   const activity = ".runtime/activity";
   closeSync(openSync(activity, "a"));
-  const { save } = openLocalWaitlist(".runtime/waitlist.sqlite");
-  const bot = createBot(loadToken("development"), save, () => {
-    const now = new Date();
-    utimesSync(activity, now, now);
-  });
+  const config = supabaseConfig();
+  const storage = openProductionWaitlist(config);
+  const store = openBotStore(config);
+  await store.texts();
+  const bot = createBot(
+    loadToken("development"),
+    storage.save,
+    () => {
+      const now = new Date();
+      utimesSync(activity, now, now);
+    },
+    undefined,
+    store,
+  );
   bot.catch(() =>
     console.error(JSON.stringify({ event: "polling_update_failed" })),
   );
@@ -23,10 +34,14 @@ async function main() {
   }
   process.once("SIGTERM", () => void bot.stop());
   process.once("SIGINT", () => void bot.stop());
-  await bot.start({
-    allowed_updates: ["message", "callback_query"],
-    onStart: () => console.log("Dev-бот запущен"),
-  });
+  try {
+    await bot.start({
+      allowed_updates: ["message", "callback_query"],
+      onStart: () => console.log("Dev-бот запущен с Supabase"),
+    });
+  } finally {
+    await Promise.all([storage.close(), store.close()]);
+  }
 }
 
 main().catch(() => {

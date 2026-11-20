@@ -2,7 +2,7 @@ services:
   bot:
     build:
       context: ../..
-      dockerfile: deploy/local/Dockerfile
+      dockerfile: deploy/vps/Dockerfile
     command: ["node", "dist/src/entrypoints/webhook.js"]
     env_file: ../../.env.production.runtime
     environment:

@@ -60,6 +60,8 @@ export function openDatabase(config: DatabaseConfig, max = 2) {
   const pool = new pg.Pool({
     ...connection,
     max,
+    maxUses: 1,
+    query_timeout: connection.query_timeout ?? 5_000,
     connectionTimeoutMillis: 3_000,
     statement_timeout: connection.statement_timeout ?? 5_000,
   });

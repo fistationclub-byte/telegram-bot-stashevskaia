@@ -15,7 +15,8 @@
     "dev:up": "node scripts/local.mjs up",
     "dev:stop": "node scripts/local.mjs stop",
     "dev:status": "node scripts/local.mjs ps",
-    "dev:logs": "node scripts/local.mjs logs"
+    "dev:logs": "node scripts/local.mjs logs",
+    "build:edge": "node scripts/build-edge.mjs"
   },
   "dependencies": {
     "grammy": "^1.38.0",
@@ -26,6 +27,7 @@
   "devDependencies": {
     "@types/node": "^24.0.0",
     "@types/pg": "^8.23.1",
+    "esbuild": "0.28.2",
     "eslint": "^9.0.0",
     "prettier": "^3.6.0",
     "typescript": "^5.9.0",

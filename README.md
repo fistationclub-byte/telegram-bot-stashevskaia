@@ -18,6 +18,6 @@
 
 `pnpm lint`, `pnpm format:check`, `pnpm typecheck`, `pnpm test`, `pnpm build`. Тесты используют имитацию Telegram API.
 
-Из рабочей ветки открывайте PR в `development`. После проверки выпуска открывайте PR из `development` в `master`. Инструкции по развёртыванию и настройке рассылок находятся в [документации IsHosting](deploy/vps/README.md).
+Из рабочей ветки открывайте PR в `development`. После проверки выпуска открывайте PR из `development` в `master`. Инструкции по развёртыванию и настройке рассылок находятся в [документации Supabase](deploy/supabase/README.md).
 
 Пример отслеживания источника: посетитель TikTok запускает бота по ссылке `https://t.me/stashevskaia_bot?start=tiktok`. Бот сохраняет первый известный источник в Supabase и добавляет к ссылкам на сайт `source1=tiktok&source2=telegram`, `utm_source=tiktok&utm_medium=telegram`. Для новых кодов и кампаний используйте таблицу `bot.traffic_sources`. Тестовый бот сохраняет предзаписи в Supabase. Подключение берётся из закрытого файла `.env.supabase.runtime`.

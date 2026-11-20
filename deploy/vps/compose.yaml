@@ -11,6 +11,8 @@ services:
       NODE_ENV: production
       MAILING_ENABLED: "0"
       WARMUP_ENABLED: "0"
+    extra_hosts:
+      - "api.telegram.org:149.154.167.220"
     restart: unless-stopped
     init: true
     read_only: true
